@@ -1,9 +1,6 @@
 package com.Amazon;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.security.InvalidParameterException;
 import java.text.MessageFormat;
 import java.util.Properties;
@@ -19,8 +16,11 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
 import org.testng.Reporter;
 import org.testng.asserts.Assertion;
+
+import static java.lang.System.exit;
 
 public class Invokedriver {
 
@@ -30,8 +30,9 @@ public class Invokedriver {
     //Invoke driver generic method
     public WebDriver indriver() throws IOException {
         loadProperty();
-        String url = prop.getProperty("url");
-        String browsername = prop.getProperty("browser");
+
+        String url = getCustomProperty("url1");
+        String browsername = getCustomProperty("browser");
 
         if (browsername.equalsIgnoreCase("firefox")) {
             System.setProperty("webdriver.gecko.driver", ".\\exefiles/geckodriver.exe");
@@ -48,7 +49,7 @@ public class Invokedriver {
             driver.manage().window().maximize();
             Reporter.log("Chrome launched", true);
         } else if (browsername.equalsIgnoreCase("ie")) {
-            System.setProperty("webdriver.ie.driver", ".\\exeFiles/IEDriverServer.exe");
+            System.setProperty("webdriver.ie.driver", ".\\exefiles/IEDriverServer.exe");
             driver = new InternetExplorerDriver();
             // driver= new RemoteWebDriver(DesiredCapabilities.internetExplorer());
             driver.get(url);
@@ -58,20 +59,30 @@ public class Invokedriver {
     }
 
     //Generic method for loading property file.
-    public static void loadProperty() throws IOException {
-        try (InputStream input = Invokedriver.class.getClassLoader().getResourceAsStream(".\\resource/data.properties")) {
+    public void loadProperty() throws IOException {
+        String fileName = ".\\resource\\data.properties";
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = new FileInputStream(fileName);
             prop = new Properties();
-            if (input == null) {
-                System.out.println("Sorry, unable to find config.properties");
-                return;
-            }
-            FileInputStream fil1 = new FileInputStream(
-                    ".\\resource/data.properties");
-            prop.load(fil1);
-        } catch (IOException exception) {
-            System.out.println(exception.getLocalizedMessage());
+            prop.load(fileInputStream);
+        } catch (FileNotFoundException fileNotFound) {
+            fileNotFound.printStackTrace();
+        } catch (IOException ioexception) {
+            ioexception.printStackTrace();
+        } finally {
+            fileInputStream.close();
         }
+    }
 
+    public String getCustomProperty(String property) throws IOException {
+        loadProperty();
+        if (prop.getProperty(property) == null) {
+            System.out.println("Error! Key --> "+property+" is not found in property file");
+            Assert.assertEquals(true, false);
+            exit(0);
+        }
+        return prop.getProperty(property);
     }
 
     //Screenshot method for fail test cases generic method

@@ -19,14 +19,13 @@ public class Loginmethod extends Invokedriver {
 
         asser().assertEquals("Enter your email or mobile phone number", lg.validation().getText());
         Reporter.log("Validation message displayed", true);
-        Invokedriver.loadProperty();
+        loadProperty();
 
-
-        lg.email().sendKeys(prop.getProperty("namem"));
+        lg.email().sendKeys(getCustomProperty("nameyretye"));
 
 
         lg.continuebutton().click();
-        lg.password().sendKeys(prop.getProperty("password"));
+        lg.password().sendKeys(getCustomProperty("password"));
         lg.submit().click();
         Reporter.log("logged in successfully", true);
         asser().assertEquals("Hello, mohit", lg.loginassert().getText());
